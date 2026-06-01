@@ -103,7 +103,7 @@ import random
 import copy
 import time
 
-# -----------------------------
+
 # Helpers
 # -----------------------------
 
@@ -146,7 +146,6 @@ def is_valid_schedule(schedule):
     return True
 
 
-# -----------------------------
 # Quick change detection
 # -----------------------------
 
@@ -177,7 +176,6 @@ def count_quick_changes(schedule):
     return sum(len(v) for v in find_quick_changes(schedule).values()) // 2
 
 
-# -----------------------------
 # Scoring
 # -----------------------------
 
@@ -192,12 +190,12 @@ def score_schedule(schedule):
         QUICK_CHANGE_WEIGHT = 70
         COSTUME_DISTANCE_WEIGHT = 45
 
-        # Style flow
+        # style variety
         for i in range(len(act) - 1):
             if act[i]["style"] == act[i + 1]["style"]:
                 s += STYLE_WEIGHT
 
-        # Costume distance penalty
+        # costume distance penalty
         costume_positions = {}
 
         for i, dance in enumerate(act):
@@ -211,7 +209,7 @@ def score_schedule(schedule):
                 if gap > 0:
                     s += int(COSTUME_DISTANCE_WEIGHT / gap)
 
-        # Quick-change penalty
+        # quick change penalty
         dancer_positions = {}
 
         for i, dance in enumerate(act):
@@ -228,7 +226,6 @@ def score_schedule(schedule):
     score += score_act(act1)
     score += score_act(act2)
 
-    # Highlight rules
     def score_highlights(act, second=False):
         s = 0
 
@@ -249,7 +246,6 @@ def score_schedule(schedule):
     return score
 
 
-# -----------------------------
 # Candidate generation
 # -----------------------------
 
@@ -261,13 +257,11 @@ def local_choice_score(path, dance, index, act_start):
     if prev and dance["style"] == prev["style"]:
         score += 10
 
-    # Penalize 1-dance quick changes
     if index - 2 >= act_start:
         two_back = path[-2]
         if count_shared(two_back["dancers"], dance["dancers"]) > 0:
             score += 70 * count_shared(two_back["dancers"], dance["dancers"])
 
-    # Prefer farther costume spacing
     for past_index in range(act_start, len(path)):
         past = path[past_index]
         overlap = shared_costumes(past["costumes"], dance["costumes"])
@@ -275,7 +269,6 @@ def local_choice_score(path, dance, index, act_start):
             gap = index - past_index
             score += int(45 / gap) * overlap
 
-    # Prefer highlights in key spots
     if dance.get("isHighlight", False):
         score -= 20
 
@@ -305,7 +298,6 @@ def build_greedy_candidate(dances):
         if not valid_options:
             return None
 
-        # If this is the dance before finale, make sure it can lead into finale
         if index == total_len - 2:
             valid_options = [d for d in valid_options if valid_pair(d, finale)]
             if not valid_options:
@@ -318,7 +310,6 @@ def build_greedy_candidate(dances):
 
         scored.sort(key=lambda x: x[0])
 
-        # Pick from top few instead of always best, to create variety
         top_k = scored[:min(4, len(scored))]
         chosen = random.choice(top_k)[1]
 
@@ -333,7 +324,6 @@ def build_greedy_candidate(dances):
     return None
 
 
-# -----------------------------
 # Local improvement
 # -----------------------------
 
@@ -343,7 +333,7 @@ def improve_schedule(schedule, max_swaps=500):
 
     n = len(best)
 
-    # Do not move finale
+    # do not move finale
     movable_indices = list(range(n - 1))
 
     for _ in range(max_swaps):
@@ -364,7 +354,6 @@ def improve_schedule(schedule, max_swaps=500):
     return best, best_score
 
 
-# -----------------------------
 # Generate top 3 schedules
 # -----------------------------
 
@@ -397,7 +386,6 @@ def generate_top_schedules(dances, num_solutions=3, time_budget=12):
     return solutions
 
 
-# -----------------------------
 # Debug
 # -----------------------------
 
@@ -417,10 +405,10 @@ def debug_schedule(schedule):
             )
 
             if shared_dancers:
-                print(f"⚠️ Dancer conflict: {act[i]['name']} -> {act[i+1]['name']}: {shared_dancers}")
+                print(f" Dancer conflict: {act[i]['name']} -> {act[i+1]['name']}: {shared_dancers}")
 
             if shared_costume_items:
-                print(f"⚠️ Costume conflict: {act[i]['name']} -> {act[i+1]['name']}: {shared_costume_items}")
+                print(f" Costume conflict: {act[i]['name']} -> {act[i+1]['name']}: {shared_costume_items}")
 
         print()
 
@@ -428,7 +416,6 @@ def debug_schedule(schedule):
     check(act2, "Act 2")
 
 
-# -----------------------------
 # Print
 # -----------------------------
 
@@ -464,7 +451,6 @@ def print_schedule(schedule):
     print("\n* = quick change (1 dance gap)\n")
 
 
-# -----------------------------
 # Runner
 # -----------------------------
 
@@ -493,17 +479,14 @@ def run_scheduler(json_data):
                 for d in dancers
             ])
 
-        # ACT 1
         output += "<h3>Act 1</h3>"
         for i, dance in enumerate(act1):
             output += f"<b>{i+1}. {dance['name']}</b><br>"
             output += f"Dancers: {format_dancers(dance['dancers'], i)}<br>"
             output += f"Costumes: {', '.join(dance['costumes'])}<br><br>"
 
-        # INTERMISSION
         output += "<hr><b>INTERMISSION</b><hr>"
 
-        # ACT 2
         offset = len(act1)
         output += "<h3>Act 2</h3>"
         for i, dance in enumerate(act2):
@@ -511,7 +494,6 @@ def run_scheduler(json_data):
             output += f"Dancers: {format_dancers(dance['dancers'], i + offset)}<br>"
             output += f"Costumes: {', '.join(dance['costumes'])}<br><br>"
 
-        # FOOTER INFO
         output += f"<p><b>Score:</b> {score}<br>"
         output += f"<b>Quick changes:</b> {count_quick_changes(schedule)}</p>"
 
@@ -535,7 +517,7 @@ if uploaded_file is not None:
 
     status.text("Starting scheduler...")
 
-    # fake progress animation (while your algorithm runs)
+    # fake progress animation
     for i in range(30):
         progress.progress(i + 1)
         time.sleep(0.03)
