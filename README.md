@@ -44,4 +44,4 @@ This tool returns 3 distinct valid show orders so executives can choose based on
 
 
 ### Built with: Python, Streamlit
-### Created as a class project to address to a real, personal operational problem
+### Created as a class project to address a real, personal operational problem
