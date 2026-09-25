@@ -9,7 +9,7 @@ This tool utilizes two types of constraints:
 2. Soft constraints --- these are preferences that should be optimized (style variety, high-energy pieces at act openings/closings, minimizing quick costume changes)
 
 ## How it works:
-1. Greedy Hueristic --- candidate show orders are built using a randomized top-k heuristic (each placement is scored locally against the style variety, costume spacing, and quick-change risks)
+1. Greedy Heuristic --- candidate show orders are built using a randomized top-k heuristic (each placement is scored locally against the style variety, costume spacing, and quick-change risks)
 2. Local search improvement --- performs random swap hill-climbing over movable positions (the finale must stay at the end), only accepts changes that reduce the penalty score
 
 Multiple show order candidates are generated within a time budget and ranked by score. The top 3 valid, distinct orderings are returned to the user, with quick-change dancers highlighted in red. Includes a loading animation during generation (this is decorative for UX, does not reflect true progress time).
